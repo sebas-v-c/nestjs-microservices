@@ -4,6 +4,7 @@ import { ApiGatewayService } from './api-gateway.service';
 import { AuthController } from './auth/auth.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UserController } from './user/user.controller';
+import { readFileSync } from 'fs';
 
 /**
  * ApiGatewayModule
@@ -37,16 +38,31 @@ import { UserController } from './user/user.controller';
         name: 'AUTH-SERVICE',
         transport: Transport.TCP,
         options: {
-          host: '127.0.0.1',
-          port: 8877, // puerto del servicio de autenticación
+          // ⚠️ IMPORTANTE:
+          // El valor de `host` DEBE coincidir con alguno de los nombres/IP
+          // incluidos en el certificado del servidor (SAN o, de forma
+          // retro-compat, CN).  Si tu CSR se generó con `/CN=localhost` (o
+          // SAN:DNS:localhost) **no uses `127.0.0.1` aquí**, de lo contrario
+          // Node lanzará `ERR_TLS_CERT_ALTNAME_INVALID`.
+          host: 'localhost',
+          port: 8877,
         },
       },
       {
         name: 'USER-SERVICE',
         transport: Transport.TCP,
         options: {
-          host: '127.0.0.1',
-          port: 8878, // puerto del servicio de usuarios
+          // Mismo razonamiento que arriba: mantén coherencia entre certificado
+          // y endpoint real.
+          host: 'localhost',
+          port: 8878,
+          tlsOptions: {
+            key: readFileSync('./certs/client.key'),
+            cert: readFileSync('./certs/client.crt'),
+            ca: readFileSync('./certs/ca.crt'),
+            requestCert: true,
+            rejectUnauthorized: true,
+          },
         },
       },
     ]),

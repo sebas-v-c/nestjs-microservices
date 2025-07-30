@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { UserServiceModule } from './user-service.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
+import { readFileSync } from 'fs';
 
 /**
  * Arranca el microservicio de **User Service** usando transporte TCP.
@@ -19,8 +20,15 @@ async function bootstrap(): Promise<void> {
     {
       transport: Transport.TCP,
       options: {
-        host: '127.0.0.1',
+        host: 'localhost',
         port: 8878,
+        tlsOptions: {
+          key: readFileSync('./certs/server.key'),
+          cert: readFileSync('./certs/server.crt'),
+          ca: readFileSync('./certs/ca.crt'),
+          requestCert: true,
+          rejectUnauthorized: true,
+        },
       },
     },
   );
