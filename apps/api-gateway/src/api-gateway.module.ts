@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ApiGatewayController } from './api-gateway.controller';
-import { ApiGatewayService } from './api-gateway.service';
 import { AuthController } from './auth/auth.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UserController } from './user/user.controller';
@@ -8,6 +6,7 @@ import { readFileSync } from 'fs';
 import { ChannelCredentials } from '@grpc/grpc-js';
 import { AUTH_PACKAGE_NAME } from '@app/proto-types/auth';
 import { USERS_PACKAGE_NAME } from '@app/proto-types/users';
+import { LoggerModule } from 'nestjs-pino';
 
 function read(f: string) {
   return readFileSync(f);
@@ -49,6 +48,15 @@ const clientCreds = ChannelCredentials.createSsl(
   */
 
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: {
+          target: 'pino-pretty', // bonito en consola; quítalo en prod
+          options: { translateTime: 'SYS:standard' },
+        },
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      },
+    }),
     ClientsModule.register([
       {
         name: AUTH_PACKAGE_NAME,
@@ -80,7 +88,7 @@ const clientCreds = ChannelCredentials.createSsl(
       },
     ]),
   ],
-  controllers: [ApiGatewayController, AuthController, UserController],
-  providers: [ApiGatewayService],
+  controllers: [AuthController, UserController],
+  providers: [],
 })
 export class ApiGatewayModule {}

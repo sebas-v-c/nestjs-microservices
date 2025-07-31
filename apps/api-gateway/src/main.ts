@@ -2,9 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { ApiGatewayModule } from './api-gateway.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiGatewayModule);
+  const app = await NestFactory.create(ApiGatewayModule, {
+    bufferLogs: true,
+  });
+
+  app.useLogger(app.get(Logger));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,7 +33,6 @@ async function bootstrap() {
     .setTitle('Auth Microservice')
     .setDescription('Microsercio para autenticar usuarios')
     .setVersion('0.1')
-    .addTag('Auth') // Optional: Add tags if necessary
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
