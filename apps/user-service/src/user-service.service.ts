@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 /**
  * UserServiceService
@@ -26,7 +26,9 @@ export class UserServiceService {
    */
   async getUserProfile(
     userId: string,
-  ): Promise<{ id: string; username: string } | null> {
-    return this.users.find((user) => user.id === userId) ?? null;
+  ): Promise<{ id: string; username: string }> {
+    const user = this.users.find((user) => user.id === userId) ?? null;
+    if (!user) throw new NotFoundException('User not found');
+    return Promise.resolve(user);
   }
 }

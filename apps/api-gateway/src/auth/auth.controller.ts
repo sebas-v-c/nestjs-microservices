@@ -1,26 +1,45 @@
-import { Body, Controller, Inject, Logger, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  OnModuleInit,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { Response } from 'express';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import {
+  AUTH_PACKAGE_NAME,
+  AUTH_SERVICE_NAME,
+  AuthServiceClient,
+} from '@app/proto-types/auth';
+import { UserCredentialsDto } from '@app/dto';
 
 @Controller('auth')
-export class AuthController {
+export class AuthController implements OnModuleInit {
+  private authService: AuthServiceClient;
   constructor(
-    @Inject('AUTH-SERVICE') private readonly authClient: ClientProxy,
+    @Inject(AUTH_PACKAGE_NAME) private readonly authClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.authService =
+      this.authClient.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
+  }
 
   @Post('login')
   async login(
-    @Body() credentials: { username: string; password: string },
+    @Body() credentials: UserCredentialsDto,
     @Res() res: Response, // usamos la respuesta nativa
   ): Promise<void> {
     // obtenemos el JWT del microservicio
-    const { access_token } = await firstValueFrom(
-      this.authClient.send<{ access_token: string }>('auth-login', credentials),
+    const { accessToken } = await firstValueFrom(
+      this.authService.login(credentials),
     );
 
     // lo escribimos en la cabecera estándar
-    res.setHeader('Authorization', `Bearer ${access_token}`);
+    res.setHeader('Authorization', `Bearer ${accessToken}`);
 
     // sin cuerpo; 204 = No Content
     res.status(204).send();

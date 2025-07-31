@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthServiceController } from './auth-service.controller';
+import { AuthController } from './auth.controller';
 import { AuthServiceService } from './auth-service.service';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -22,7 +22,7 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  controllers: [AuthServiceController],
+  controllers: [AuthController],
   providers: [AuthServiceService],
 })
 export class AuthServiceModule {}

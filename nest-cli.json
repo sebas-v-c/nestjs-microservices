@@ -24,8 +24,33 @@
       "root": "apps/auth-service",
       "entryFile": "main",
       "sourceRoot": "apps/auth-service/src",
+      "assets": [
+        {
+          "include": "**/*.proto",
+          "outDir": "proto",
+          "watchAssets": true
+        }
+      ],
       "compilerOptions": {
         "tsConfigPath": "apps/auth-service/tsconfig.app.json"
+      }
+    },
+    "dto": {
+      "type": "library",
+      "root": "libs/dto",
+      "entryFile": "index",
+      "sourceRoot": "libs/dto/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/dto/tsconfig.lib.json"
+      }
+    },
+    "proto-types": {
+      "type": "library",
+      "root": "libs/proto-types",
+      "entryFile": "index",
+      "sourceRoot": "libs/proto-types/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/proto-types/tsconfig.lib.json"
       }
     },
     "user-service": {

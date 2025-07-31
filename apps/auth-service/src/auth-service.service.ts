@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserCredentials, ValidUser } from '@app/proto-types/auth';
 
 /**
  * AuthServiceService
@@ -28,19 +29,16 @@ export class AuthServiceService {
    * @returns `{ access_token: string }` si las credenciales son correctas.
    * @throws UnauthorizedException Si el usuario/contraseña no coinciden.
    */
-  async login(credential: {
-    username: string;
-    password: string;
-  }): Promise<{ access_token: string }> {
+  async login(credential: UserCredentials): Promise<{ accessToken: string }> {
     // Demo: autenticación simplificada
     if (credential.username === 'admin' && credential.password === 'password') {
       const payload = {
-        sub: '123',
+        id: '123',
         username: credential.username,
         role: 'admin',
       };
-      const token = this.jwtService.sign(payload);
-      return { access_token: token };
+      const token = await this.jwtService.signAsync(payload);
+      return { accessToken: token };
     }
     throw new UnauthorizedException('Invalid Credentials');
   }
@@ -54,14 +52,17 @@ export class AuthServiceService {
    *          • `userId` : ID del usuario (`sub`) o `null`.
    *          • `role`   : Rol del usuario o `null`.
    */
-  async validateToken(
-    token: string,
-  ): Promise<{ valid: boolean; userId: string | null; role: string | null }> {
+  async validateToken(token: string) {
     try {
-      const decoded = this.jwtService.verify(token);
-      return { valid: true, userId: decoded.sub, role: decoded.role };
-    } catch (error) {
-      return { valid: false, userId: null, role: null };
+      const decoded = await this.jwtService.verifyAsync<{
+        id: string;
+        username: string;
+        role: string;
+      }>(token);
+      return { valid: true, userId: decoded.id, role: decoded.role };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      return { valid: false, userId: '', role: '' };
     }
   }
 }

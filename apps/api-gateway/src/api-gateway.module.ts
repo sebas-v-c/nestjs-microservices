@@ -5,6 +5,22 @@ import { AuthController } from './auth/auth.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UserController } from './user/user.controller';
 import { readFileSync } from 'fs';
+import { ChannelCredentials } from '@grpc/grpc-js';
+import { AUTH_PACKAGE_NAME } from '@app/proto-types/auth';
+import { USERS_PACKAGE_NAME } from '@app/proto-types/users';
+
+function read(f: string) {
+  return readFileSync(f);
+}
+
+const clientCreds = ChannelCredentials.createSsl(
+  read('./certs/ca.crt'),
+  read('./certs/client.key'),
+  read('./certs/client.crt'),
+  {
+    rejectUnauthorized: true,
+  },
+);
 
 /**
  * ApiGatewayModule
@@ -35,8 +51,8 @@ import { readFileSync } from 'fs';
   imports: [
     ClientsModule.register([
       {
-        name: 'AUTH-SERVICE',
-        transport: Transport.TCP,
+        name: AUTH_PACKAGE_NAME,
+        transport: Transport.GRPC,
         options: {
           // ⚠️ IMPORTANTE:
           // El valor de `host` DEBE coincidir con alguno de los nombres/IP
@@ -44,25 +60,22 @@ import { readFileSync } from 'fs';
           // retro-compat, CN).  Si tu CSR se generó con `/CN=localhost` (o
           // SAN:DNS:localhost) **no uses `127.0.0.1` aquí**, de lo contrario
           // Node lanzará `ERR_TLS_CERT_ALTNAME_INVALID`.
-          host: 'localhost',
-          port: 8877,
+          url: 'localhost:3001',
+          package: AUTH_PACKAGE_NAME,
+          protoPath: './proto/auth.proto',
+          credentials: clientCreds,
         },
       },
       {
-        name: 'USER-SERVICE',
-        transport: Transport.TCP,
+        name: USERS_PACKAGE_NAME,
+        transport: Transport.GRPC,
         options: {
           // Mismo razonamiento que arriba: mantén coherencia entre certificado
           // y endpoint real.
-          host: 'localhost',
-          port: 8878,
-          tlsOptions: {
-            key: readFileSync('./certs/client.key'),
-            cert: readFileSync('./certs/client.crt'),
-            ca: readFileSync('./certs/ca.crt'),
-            requestCert: true,
-            rejectUnauthorized: true,
-          },
+          url: 'localhost:3002',
+          package: USERS_PACKAGE_NAME,
+          protoPath: './proto/users.proto',
+          credentials: clientCreds,
         },
       },
     ]),

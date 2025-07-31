@@ -17,6 +17,19 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@app/dto": [
+        "libs/dto/src"
+      ],
+      "@app/dto/*": [
+        "libs/dto/src/*"
+      ],
+      "@app/proto-types": [
+        "libs/proto-types/src"
+      ],
+      "@app/proto-types/*": [
+        "libs/proto-types/src/*"
+      ]
+    }
   }
 }

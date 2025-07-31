@@ -3,6 +3,12 @@ import { UserServiceModule } from './user-service.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
 import { readFileSync } from 'fs';
+import { ServerCredentials } from '@grpc/grpc-js';
+import { USERS_PACKAGE_NAME } from '@app/proto-types/users';
+
+function read(f: string) {
+  return readFileSync(f);
+}
 
 /**
  * Arranca el microservicio de **User Service** usando transporte TCP.
@@ -14,21 +20,26 @@ import { readFileSync } from 'fs';
  * entrantes hasta que el proceso finaliza.
  */
 async function bootstrap(): Promise<void> {
-  // Creamos la aplicación como micro-servicio TCP
+  const serverCreds = ServerCredentials.createSsl(
+    read('./certs/ca.crt'),
+    [
+      {
+        private_key: read('./certs/server.key'),
+        cert_chain: read('./certs/server.crt'),
+      },
+    ],
+    true,
+  );
+  // Creamos la aplicación como microservicio TCP
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     UserServiceModule,
     {
-      transport: Transport.TCP,
+      transport: Transport.GRPC,
       options: {
-        host: 'localhost',
-        port: 8878,
-        tlsOptions: {
-          key: readFileSync('./certs/server.key'),
-          cert: readFileSync('./certs/server.crt'),
-          ca: readFileSync('./certs/ca.crt'),
-          requestCert: true,
-          rejectUnauthorized: true,
-        },
+        url: 'localhost:3002',
+        package: USERS_PACKAGE_NAME,
+        protoPath: './proto/users.proto',
+        credentials: serverCreds,
       },
     },
   );
@@ -37,7 +48,7 @@ async function bootstrap(): Promise<void> {
   await app.listen();
 
   // Mensaje informativo al iniciar correctamente
-  Logger.log('User Service is running TCP...');
+  Logger.log('User Service is running GRPC...');
 }
 
 // Punto de entrada

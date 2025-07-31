@@ -1,6 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { UserServiceService } from './user-service.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import {
+  UserRequest,
+  UserResponse,
+  UserServiceController,
+  UserServiceControllerMethods,
+} from '@app/proto-types/users';
+import { Observable } from 'rxjs';
 
 /**
  * UserServiceController
@@ -10,13 +17,18 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
  * servicio correspondiente.
  */
 @Controller()
-export class UserServiceController {
+@UserServiceControllerMethods()
+export class UserController implements UserServiceController {
   /**
    * Crea una instancia del controlador e inyecta el servicio de usuarios.
    *
    * @param userServiceService Servicio con la lógica de negocio de usuarios.
    */
   constructor(private readonly userServiceService: UserServiceService) {}
+
+  async getUserProfile(request: UserRequest): Promise<UserResponse> {
+    return this.userServiceService.getUserProfile(request.userId);
+  }
 
   /**
    * Devuelve el perfil de un usuario dado su identificador.
@@ -26,8 +38,10 @@ export class UserServiceController {
    * @returns Promesa que resuelve con el perfil del usuario o `null` si no se
    *          encuentra.
    */
+  /*
   @MessagePattern('get-user-profile')
   async getUserProfile(@Payload() userId: string) {
     return this.userServiceService.getUserProfile(userId);
   }
+   */
 }
