@@ -13,11 +13,14 @@ import {
   AUTH_SERVICE_NAME,
   AuthServiceClient,
 } from '@app/proto-types/auth';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../../public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate, OnModuleInit {
   private authService: AuthServiceClient;
   constructor(
+    private readonly reflector: Reflector,
     @Inject(AUTH_PACKAGE_NAME) private readonly authClient: ClientGrpc,
   ) {}
 
@@ -27,6 +30,14 @@ export class AuthGuard implements CanActivate, OnModuleInit {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // check if the route is marked as public with @Public()
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
+
+    // get request object
     const req: Request = context.switchToHttp().getRequest();
     const authHeader = req.headers['authorization'] as string;
     if (!authHeader)

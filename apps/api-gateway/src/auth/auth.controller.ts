@@ -15,6 +15,7 @@ import {
   AuthServiceClient,
 } from '@app/proto-types/auth';
 import { UserCredentialsDto } from '@app/dto';
+import { Public } from '../public.decorator';
 
 @Controller('auth')
 export class AuthController implements OnModuleInit {
@@ -28,6 +29,7 @@ export class AuthController implements OnModuleInit {
       this.authClient.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
 
+  @Public()
   @Post('login')
   async login(
     @Body() credentials: UserCredentialsDto,

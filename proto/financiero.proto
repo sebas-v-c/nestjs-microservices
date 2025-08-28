@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package financiero;
+
+
+service FuenteService {
+  rpc getFuentes (ListFuentesRequest) returns (ListFuentesResponse);
+}
+
+
+message Fuente {
+  int32 fnt_id = 1;
+  string fnt_nombre = 2;
+  string fnt_descripcion = 3;
+}
+
+message ListFuentesRequest {}
+
+message ListFuentesResponse {
+  repeated Fuente fuentes = 1;
+}
+

@@ -4,13 +4,12 @@ import {
   Inject,
   OnModuleInit,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../guards/auth/auth.guard';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import {
   USER_SERVICE_NAME,
+  UserRequest,
   USERS_PACKAGE_NAME,
   UserServiceClient,
 } from '@app/proto-types/users';
@@ -27,10 +26,10 @@ export class UserController implements OnModuleInit {
       this.userClient.getService<UserServiceClient>(USER_SERVICE_NAME);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get()
-  async getUserProfile(@Req() req) {
-    const userId = req.user.userId as string;
+  async getUserProfile(@Req() req: Request & { user: UserRequest }) {
+    const userId = req.user.userId;
     const userObservable = this.userService.getUserProfile({ userId });
     return await firstValueFrom(userObservable);
   }

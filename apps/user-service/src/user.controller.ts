@@ -1,13 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { UserServiceService } from './user-service.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+/* import { MessagePattern, Payload } from '@nestjs/microservices'; */
 import {
   UserRequest,
   UserResponse,
   UserServiceController,
   UserServiceControllerMethods,
 } from '@app/proto-types/users';
-import { Observable } from 'rxjs';
+/* import { Observable } from 'rxjs'; */
 
 /**
  * UserServiceController

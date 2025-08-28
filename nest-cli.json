@@ -3,6 +3,10 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "apps/api-gateway/src",
   "compilerOptions": {
+    "assets": [
+      "**/*.proto"
+    ],
+    "watchAssets": true,
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
@@ -42,6 +46,24 @@
       "sourceRoot": "libs/dto/src",
       "compilerOptions": {
         "tsConfigPath": "libs/dto/tsconfig.lib.json"
+      }
+    },
+    "financiero": {
+      "type": "application",
+      "root": "apps/financiero",
+      "entryFile": "main",
+      "sourceRoot": "apps/financiero/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/financiero/tsconfig.app.json"
+      }
+    },
+    "prisma": {
+      "type": "library",
+      "root": "libs/prisma",
+      "entryFile": "index",
+      "sourceRoot": "libs/prisma/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/prisma/tsconfig.lib.json"
       }
     },
     "proto-types": {

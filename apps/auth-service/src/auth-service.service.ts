@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserCredentials, ValidUser } from '@app/proto-types/auth';
+import { UserCredentials /*, ValidUser*/ } from '@app/proto-types/auth';
 
 /**
  * AuthServiceService

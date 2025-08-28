@@ -7,6 +7,10 @@ import { ChannelCredentials } from '@grpc/grpc-js';
 import { AUTH_PACKAGE_NAME } from '@app/proto-types/auth';
 import { USERS_PACKAGE_NAME } from '@app/proto-types/users';
 import { LoggerModule } from 'nestjs-pino';
+import { FINANCIERO_PACKAGE_NAME } from '@app/proto-types/financiero';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guards/auth/auth.guard';
+import { FinancieroController } from './financiero/financiero.controller';
 
 function read(f: string) {
   return readFileSync(f);
@@ -86,9 +90,24 @@ const clientCreds = ChannelCredentials.createSsl(
           credentials: clientCreds,
         },
       },
+      {
+        name: FINANCIERO_PACKAGE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: 'localhost:3003',
+          package: FINANCIERO_PACKAGE_NAME,
+          protoPath: './proto/financiero.proto',
+          credentials: clientCreds,
+        },
+      },
     ]),
   ],
-  controllers: [AuthController, UserController],
-  providers: [],
+  controllers: [AuthController, UserController, FinancieroController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class ApiGatewayModule {}

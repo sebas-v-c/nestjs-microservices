@@ -2,44 +2,50 @@
 // versions:
 //   protoc-gen-ts_proto  v2.7.5
 //   protoc               v6.32.0
-// source: users.proto
+// source: financiero.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
-export const protobufPackage = 'users';
+export const protobufPackage = 'financiero';
 
-export interface UserRequest {
-  userId: string;
+export interface Fuente {
+  fntId: number;
+  fntNombre: string;
+  fntDescripcion: string;
 }
 
-export interface UserResponse {
-  id: string;
-  username: string;
+export interface ListFuentesRequest {}
+
+export interface ListFuentesResponse {
+  fuentes: Fuente[];
 }
 
-export const USERS_PACKAGE_NAME = 'users';
+export const FINANCIERO_PACKAGE_NAME = 'financiero';
 
-export interface UserServiceClient {
-  getUserProfile(request: UserRequest): Observable<UserResponse>;
+export interface FuenteServiceClient {
+  getFuentes(request: ListFuentesRequest): Observable<ListFuentesResponse>;
 }
 
-export interface UserServiceController {
-  getUserProfile(
-    request: UserRequest,
-  ): Promise<UserResponse> | Observable<UserResponse> | UserResponse;
+export interface FuenteServiceController {
+  getFuentes(
+    request: ListFuentesRequest,
+  ):
+    | Promise<ListFuentesResponse>
+    | Observable<ListFuentesResponse>
+    | ListFuentesResponse;
 }
 
-export function UserServiceControllerMethods() {
+export function FuenteServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['getUserProfile'];
+    const grpcMethods: string[] = ['getFuentes'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
         method,
       );
-      GrpcMethod('UserService', method)(
+      GrpcMethod('FuenteService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -51,7 +57,7 @@ export function UserServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcStreamMethod('UserService', method)(
+      GrpcStreamMethod('FuenteService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -60,4 +66,4 @@ export function UserServiceControllerMethods() {
   };
 }
 
-export const USER_SERVICE_NAME = 'UserService';
+export const FUENTE_SERVICE_NAME = 'FuenteService';

@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Actividad {
+  act_id          Int               @id @default(autoincrement())
+  act_subprod_id  Int
+  act_nombre      String            @db.VarChar(120)
+  act_descripcion String?
+  Subproducto     Subproducto       @relation(fields: [act_subprod_id], references: [s_prod_id], onUpdate: NoAction)
+  Detalle_Renglon Detalle_Renglon[]
+}
+
+model Dependencia {
+  dep_id          Int           @id @default(autoincrement())
+  dep_nombre      String        @unique @db.VarChar(120)
+  dep_descripcion String?       @db.VarChar(255)
+  Subproducto     Subproducto[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Detalle_Renglon {
+  det_id                 Int              @id @default(autoincrement())
+  det_act_id             Int
+  det_unej_id            Int
+  det_fnt_id             Int
+  det_ren_id             Int
+  det_saldo_total        Decimal?         @default(0) @db.Decimal(14, 2)
+  det_saldo_comprometido Decimal?         @default(0) @db.Decimal(14, 2)
+  Actividad              Actividad        @relation(fields: [det_act_id], references: [act_id], onUpdate: NoAction)
+  Fuente                 Fuente           @relation(fields: [det_fnt_id], references: [fnt_id], onUpdate: NoAction)
+  Renglon                Renglon          @relation(fields: [det_ren_id], references: [ren_id], onUpdate: NoAction)
+  Unidad_Ejecutora       Unidad_Ejecutora @relation(fields: [det_unej_id], references: [unej_id], onUpdate: NoAction)
+
+  @@index([det_act_id], map: "idx_det_renglon_act")
+}
+
+model Fuente {
+  fnt_id          Int               @id @default(autoincrement())
+  fnt_nombre      String            @unique @db.VarChar(120)
+  fnt_descripcion String?
+  Detalle_Renglon Detalle_Renglon[]
+}
+
+model Grupo {
+  grp_id          Int        @id @default(autoincrement())
+  grp_descripcion String     @unique @db.VarChar(120)
+  Subgrupo        Subgrupo[]
+}
+
+model Producto {
+  prod_id          Int           @id @default(autoincrement())
+  prod_prog_id     Int
+  prod_siges       String?       @db.VarChar(20)
+  prod_nombre      String        @db.VarChar(120)
+  prod_descripcion String?
+  Programa         Programa      @relation(fields: [prod_prog_id], references: [prog_id], onUpdate: NoAction)
+  Subproducto      Subproducto[]
+}
+
+model Programa {
+  prog_id          Int        @id @default(autoincrement())
+  prog_nombre      String     @unique @db.VarChar(120)
+  prog_descripcion String?
+  Producto         Producto[]
+}
+
+model Renglon {
+  ren_id          Int               @id @default(autoincrement())
+  ren_s_grp_id    Int
+  ren_descripcion String?           @db.VarChar(120)
+  Detalle_Renglon Detalle_Renglon[]
+  Subgrupo        Subgrupo          @relation(fields: [ren_s_grp_id], references: [s_grp_id], onUpdate: NoAction)
+}
+
+model Subgrupo {
+  s_grp_id          Int       @id @default(autoincrement())
+  s_grp_grp_id      Int
+  s_grp_descripcion String?   @db.VarChar(120)
+  Renglon           Renglon[]
+  Grupo             Grupo     @relation(fields: [s_grp_grp_id], references: [grp_id], onUpdate: NoAction)
+
+  @@unique([s_grp_grp_id, s_grp_descripcion])
+}
+
+model Subproducto {
+  s_prod_id          Int         @id @default(autoincrement())
+  s_prod_dep_id      Int
+  s_prod_prod_id     Int
+  s_prod_siges       String?     @db.VarChar(20)
+  s_prod_descripcion String?
+  Actividad          Actividad[]
+  Dependencia        Dependencia @relation(fields: [s_prod_dep_id], references: [dep_id], onUpdate: NoAction)
+  Producto           Producto    @relation(fields: [s_prod_prod_id], references: [prod_id], onUpdate: NoAction)
+}
+
+model Unidad_Ejecutora {
+  unej_id          Int               @id @default(autoincrement())
+  unej_nombre      String            @unique @db.VarChar(120)
+  unej_descripcion String?
+  Detalle_Renglon  Detalle_Renglon[]
+}

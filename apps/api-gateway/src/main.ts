@@ -30,8 +30,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Auth Microservice')
-    .setDescription('Microsercio para autenticar usuarios')
+    .setTitle('Auth Microservice gRPC')
+    .setDescription('Plantilla de nest con microservicios gRPC')
     .setVersion('0.1')
     .build();
 
