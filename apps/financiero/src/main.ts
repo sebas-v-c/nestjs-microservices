@@ -31,6 +31,10 @@ async function bootstrap() {
         package: FINANCIERO_PACKAGE_NAME,
         protoPath: './proto/financiero.proto',
         credentials: serverCreds,
+        // this is required to keep the case of the keys in the response
+        loader: {
+          keepCase: true,
+        },
       },
     },
   );

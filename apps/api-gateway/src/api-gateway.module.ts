@@ -76,6 +76,10 @@ const clientCreds = ChannelCredentials.createSsl(
           package: AUTH_PACKAGE_NAME,
           protoPath: './proto/auth.proto',
           credentials: clientCreds,
+          // this is required to keep the case of the keys in the response
+          loader: {
+            keepCase: true,
+          },
         },
       },
       {
@@ -88,6 +92,10 @@ const clientCreds = ChannelCredentials.createSsl(
           package: USERS_PACKAGE_NAME,
           protoPath: './proto/users.proto',
           credentials: clientCreds,
+          // this is required to keep the case of the keys in the response
+          loader: {
+            keepCase: true,
+          },
         },
       },
       {
@@ -98,6 +106,10 @@ const clientCreds = ChannelCredentials.createSsl(
           package: FINANCIERO_PACKAGE_NAME,
           protoPath: './proto/financiero.proto',
           credentials: clientCreds,
+          // this is required to keep the case of the keys in the response
+          loader: {
+            keepCase: true,
+          },
         },
       },
     ]),

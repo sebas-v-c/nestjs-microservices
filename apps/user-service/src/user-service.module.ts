@@ -6,10 +6,10 @@ import { UserServiceService } from './user-service.service';
  * UserServiceModule
  *
  * Módulo de NestJS que agrupa todos los artefactos relacionados con el
- * micro-servicio de usuarios.
+ * microservicio de usuarios.
  *
  * • `controllers`: controla los mensajes entrantes (`UserServiceController`).
- * • `providers`  : contiene la lógica de negocio (`UserServiceService`).
+ * • `providers`: contiene la lógica de negocio (`UserServiceService`).
  *
  * Se exporta para que pueda ser importado desde el bootstrap principal.
  */

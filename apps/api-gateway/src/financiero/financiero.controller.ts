@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Controller, Get, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -29,6 +24,6 @@ export class FinancieroController implements OnModuleInit {
 
   @Get()
   async getFuentes() {
-    return firstValueFrom(this.fuenteService.getFuentes({}));
+    return await firstValueFrom(this.fuenteService.getFuentes({}));
   }
 }

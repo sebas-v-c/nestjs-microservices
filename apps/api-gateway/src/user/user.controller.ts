@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  OnModuleInit,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Inject, OnModuleInit, Req } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import {
