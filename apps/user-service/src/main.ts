@@ -60,6 +60,7 @@ async function bootstrap(): Promise<void> {
     },
   );
 
+  app.enableShutdownHooks();
   // Iniciamos la escucha
   await app.listen();
 

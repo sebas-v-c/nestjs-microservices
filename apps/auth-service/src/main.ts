@@ -66,6 +66,7 @@ async function bootstrap(): Promise<void> {
     },
   );
 
+  app.enableShutdownHooks();
   // Comienza a escuchar peticiones entrantes
   await app.listen();
 

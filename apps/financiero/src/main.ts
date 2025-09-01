@@ -61,6 +61,7 @@ async function bootstrap() {
       },
     },
   );
+  app.enableShutdownHooks();
 
   // app.useGlobalFilters(new GrpcExceptionFilter());
   await app.listen();

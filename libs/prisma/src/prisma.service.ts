@@ -29,4 +29,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
   }
+
+  /**
+   * Hook de apagado para cerrar la conexión con la base de datos.
+   */
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
 }
