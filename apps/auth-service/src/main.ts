@@ -44,6 +44,10 @@ async function bootstrap(): Promise<void> {
         package: AUTH_PACKAGE_NAME,
         protoPath: './proto/auth.proto',
         credentials: serverCreds,
+        // this is required to keep the case of the keys in the response
+        loader: {
+          keepCase: true,
+        },
       },
     },
   );
@@ -56,4 +60,4 @@ async function bootstrap(): Promise<void> {
 }
 
 // Ejecuta el bootstrap al iniciar el proceso
-bootstrap();
+void bootstrap();

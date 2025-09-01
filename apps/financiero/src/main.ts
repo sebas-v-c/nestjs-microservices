@@ -39,8 +39,9 @@ async function bootstrap() {
     },
   );
 
+  // app.useGlobalFilters(new GrpcExceptionFilter());
   await app.listen();
   Logger.log('Financiero Service is running GRPC...');
 }
 
-bootstrap();
+void bootstrap();

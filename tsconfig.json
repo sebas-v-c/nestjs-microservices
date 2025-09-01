@@ -18,6 +18,12 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@app/domain-errors": [
+        "libs/domain-errors/src"
+      ],
+      "@app/domain-errors/*": [
+        "libs/domain-errors/src/*"
+      ],
       "@app/dto": [
         "libs/dto/src"
       ],

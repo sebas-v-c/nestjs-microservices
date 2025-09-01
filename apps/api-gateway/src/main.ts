@@ -3,6 +3,7 @@ import { ApiGatewayModule } from './api-gateway.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import { HttpFromGrpcErrorFilter } from './filters/http-from-grpc-error.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule, {
@@ -28,6 +29,8 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalFilters(new HttpFromGrpcErrorFilter());
+
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Auth Microservice gRPC')
@@ -40,4 +43,4 @@ async function bootstrap() {
 
   await app.listen(process.env.port ?? 3000);
 }
-bootstrap();
+void bootstrap();

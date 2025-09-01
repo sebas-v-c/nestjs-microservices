@@ -39,6 +39,15 @@
         "tsConfigPath": "apps/auth-service/tsconfig.app.json"
       }
     },
+    "domain-errors": {
+      "type": "library",
+      "root": "libs/domain-errors",
+      "entryFile": "index",
+      "sourceRoot": "libs/domain-errors/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/domain-errors/tsconfig.lib.json"
+      }
+    },
     "dto": {
       "type": "library",
       "root": "libs/dto",

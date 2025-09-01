@@ -22,7 +22,7 @@ export class FinancieroController implements OnModuleInit {
       );
   }
 
-  @Get()
+  @Get('fuentes')
   async getFuentes() {
     return await firstValueFrom(this.fuenteService.getFuentes({}));
   }

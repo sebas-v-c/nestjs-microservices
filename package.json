@@ -94,6 +94,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
+      "^@app/domain-errors(|/.*)$": "<rootDir>/libs/domain-errors/src/$1",
       "^@app/dto(|/.*)$": "<rootDir>/libs/dto/src/$1",
       "^@app/middlewares(|/.*)$": "<rootDir>/libs/middlewares/src/$1",
       "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",

@@ -15,7 +15,7 @@ message UserCredentials {
 }
 
 message UserAccess {
-  string access_token = 1;
+  string accessToken = 1;
 }
 
 
