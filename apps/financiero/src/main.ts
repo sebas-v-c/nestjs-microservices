@@ -6,10 +6,33 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { FINANCIERO_PACKAGE_NAME } from '@app/proto-types/financiero';
 import { Logger } from '@nestjs/common';
 
+/**
+ * Lee un archivo del sistema y devuelve su contenido como Buffer.
+ *
+ * Utilidad para cargar certificados y llaves requeridos por TLS/mTLS.
+ *
+ * @param f Ruta del archivo a leer desde disco.
+ * @returns Buffer con el contenido del archivo.
+ */
 function read(f: string) {
   return readFileSync(f);
 }
 
+/**
+ * Punto de entrada del microservicio Financiero (gRPC).
+ *
+ * - Configura las credenciales TLS del servidor (mTLS) usando la CA y los
+ *   certificados locales.
+ * - Crea una microaplicación Nest con transporte gRPC y opciones derivadas del
+ *   contrato protobuf del dominio Financiero.
+ * - Inicia la escucha de solicitudes entrantes y registra un log de arranque.
+ *
+ * Consideraciones de despliegue:
+ * - Asegúrate de que el host en `options.url` coincida con el SAN/CN del certificado.
+ * - Mantén rutas de certificados, host y puerto en variables de entorno en producción.
+ *
+ * @returns Promesa resuelta cuando el microservicio queda escuchando el canal gRPC.
+ */
 async function bootstrap() {
   const serverCreds = ServerCredentials.createSsl(
     read('./certs/ca.crt'),

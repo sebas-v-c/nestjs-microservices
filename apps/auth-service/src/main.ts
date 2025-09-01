@@ -7,21 +7,35 @@ import { readFileSync } from 'fs';
 import { AUTH_PACKAGE_NAME } from '@app/proto-types/auth';
 import { ServerCredentials } from '@grpc/grpc-js';
 
+/**
+ * Lee un archivo del sistema de ficheros y devuelve su contenido.
+ *
+ * Utilidad para cargar certificados/llaves TLS desde disco.
+ *
+ * @param f Ruta del archivo a leer.
+ * @returns Buffer con el contenido del archivo.
+ */
 function read(f: string) {
   return readFileSync(f);
 }
 
 /**
- * Entry-point para el microservicio **Auth Service**.
+ * Punto de entrada del microservicio de Autenticación (gRPC).
  *
- * El servicio se levanta como microservicio TCP escuchando en `127.0.0.1:8877`.
- * Una vez iniciado permanece a la espera de mensajes hasta que el proceso
- * finaliza.
+ * - Configura credenciales TLS del servidor (mTLS) usando certificados locales.
+ * - Arranca una aplicación Nest en modo microservicio con transporte gRPC.
+ * - Expone los handlers definidos por `AuthServiceModule` conforme al contrato protobuf.
  *
- * Uso:
- * ```bash
- * node dist/main.js   # o `npm run start:prod`
- * ```
+ * Flujo:
+ * 1. Construye `ServerCredentials` con CA, certificado y llave del servidor.
+ * 2. Crea la microapp (`createMicroservice`) con `Transport.GRPC` y opciones (url, paquete, proto, credenciales).
+ * 3. Inicia la escucha de solicitudes entrantes (`app.listen()`).
+ *
+ * Errores y seguridad:
+ * - Asegúrate de que los certificados coincidan con el `url` expuesto (SAN/CN).
+ * - Mantén rutas de certificados y endpoints en variables de entorno para producción.
+ *
+ * @returns Promesa que se resuelve cuando el microservicio queda escuchando.
  */
 async function bootstrap(): Promise<void> {
   const serverCreds = ServerCredentials.createSsl(

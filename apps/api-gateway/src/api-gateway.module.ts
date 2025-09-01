@@ -12,10 +12,25 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guards/auth/auth.guard';
 import { FinancieroController } from './financiero/financiero.controller';
 
+/**
+ * Lee un archivo del sistema como Buffer.
+ *
+ * Utilidad para cargar certificados y llaves requeridos por mTLS.
+ *
+ * @param f Ruta del archivo a leer.
+ * @returns Contenido del archivo como Buffer.
+ */
 function read(f: string) {
   return readFileSync(f);
 }
 
+/**
+ * Credenciales de canal gRPC usando mTLS (Mutual TLS).
+ *
+ * - Usa la CA (`ca.crt`) para validar el certificado del servidor.
+ * - Presenta certificado y llave del cliente (`client.crt` y `client.key`).
+ * - `rejectUnauthorized: true` obliga a que el servidor sea confiable según la CA.
+ */
 const clientCreds = ChannelCredentials.createSsl(
   read('./certs/ca.crt'),
   read('./certs/client.key'),
@@ -28,18 +43,12 @@ const clientCreds = ChannelCredentials.createSsl(
 /**
  * ApiGatewayModule
  *
- * Módulo principal del **API Gateway**.
- * Orquesta la comunicación entre el front-end (peticiones HTTP) y los
- * microservicios de autenticación y usuarios a través de transporte TCP.
+ * Módulo principal del API Gateway.
  *
- * Características clave
- * ---------------------
- * • Expone controladores HTTP (`ApiGatewayController`, `AuthController`, `UserController`).
- * • Registra dos _client proxies_:
- *   - `AUTH-SERVICE`  → Microservicio de autenticación (puerto 8877).
- *   - `USER-SERVICE`  → Microservicio de usuarios       (puerto 8878).
- * • El bloque comentado explica la intención de implementar mTLS para
- *   cumplir con Zero-Trust Communication (TLS mutuo host ↔ cliente).
+ * - Expone controladores HTTP que delegan en microservicios gRPC (Auth, Users, Financiero).
+ * - Registra clientes gRPC con mTLS hacia cada microservicio.
+ * - Configura logging HTTP mediante `nestjs-pino`.
+ * - Aplica un guard global de autenticación (`AuthGuard`) y permite opt‑out con `@Public()`.
  */
 @Module({
   /*

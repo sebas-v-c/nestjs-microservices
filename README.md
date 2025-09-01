@@ -2,9 +2,10 @@
 
 Repositorio **políglota** construido con [NestJS 11](https://nestjs.com) que demuestra una arquitectura de micro-servicios lista para producción.
 
-* **API Gateway** – Punto de entrada HTTP que reenvía las peticiones a los servicios internos mediante TCP.
+* **API Gateway** – Punto de entrada HTTP que reenvía las peticiones a los servicios internos mediante gRPC.
 * **Servicio de Autenticación** – Emite y valida JWT.
 * **Servicio de Usuarios** – CRUD básico (pendiente de implementar).
+* **Servicio de Financiero** – Endpoints gRPC de ejemplo (Fuentes).
 
 ---
 
@@ -13,12 +14,13 @@ Repositorio **políglota** construido con [NestJS 11](https://nestjs.com) que de
 | Área               | Detalles                                                                    |
 | ------------------ | ---------------------------------------------------------------------------- |
 | Gateway            | Servidor HTTP basado en Express y NestJS.                                    |
-| Transporte         | Driver TCP de `@nestjs/microservices` (binario y eficiente).                 |
+| Transporte         | gRPC de `@nestjs/microservices` con soporte para TLS/mTLS.                   |
 | Autenticación      | `@nestjs/jwt` con tokens de corta duración.                                  |
 | Pruebas            | **Jest** para unitarias y end-to-end; cobertura incluida.                    |
 | Tooling            | **Nx** orquesta el monorepo; recarga en caliente (`start:dev`).             |
 | Lint/Formateo      | **ESLint 9** + **Prettier 3** (una única fuente de verdad para el formato). |
 | Build              | Compilador **SWC** para builds TypeScript ultra-rápidos.                     |
+
 
 ---
 
@@ -26,11 +28,13 @@ Repositorio **políglota** construido con [NestJS 11](https://nestjs.com) que de
 
 ## 🚀 Puesta en Marcha
 
+
 ### 1. Requisitos
 
 * Node 18 LTS (o superior)
 * npm (incluido en Node)
   > También funcionan Yarn/pnpm; ajusta los comandos según tu gestor.
+
 
 ### 2. Instalación
 ```sh
@@ -39,33 +43,47 @@ bash npm ci # instalacion reproducible
 
 ### 3. Ejecutar **Todos los servicios** en modo desarrollo
 ```sh
+# api gateway HTTP
 npm run start:dev api-gateway
+# Microservicios gRPC
 npm run start:dev auth-service
 npm run start:dev user-service
 ```
 
-| El gateway escucha en **http://localhost:3000** y reenvía las peticiones a los microservicios por TCP
+- El gateway escucha en http://localhost:3000
+- Documentación OpenAPI/Swagger en http://localhost:3000/api/docs
+    - Pulsa “Authorize” y pega: Bearer <tu_JWT> para probar endpoints protegidos.
+
 
 ## ⚙️ Variables de Entorno
 
-Cada app puede tener su propio `.env` cargado con `@nestjs/config` (añádelo si lo necesitas).  
-En la PoC las siguientes variables están **hard-codeadas** y **deben cambiarse en producción**:
 
-| Variable         | Valor actual | Descripción                               |
-| ---------------- | ------------ | ----------------------------------------- |
-| `JWT_SECRET`     | `"<secret>"` | Secreto compartido para firmar JWT.       |
-| `AUTH_TCP_PORT`  | `8877`       | Puerto del servicio de autenticación.     |
-| `USER_TCP_PORT`  | `8878`       | Puerto del servicio de usuarios.          |
+Cada app puede tener su propio `.env` cargado con `@nestjs/config`.  
+En la PoC algunos valores están hard-coded y deben moverse a variables de entorno en producción:
+
+| Variable                | Ejemplo/Actual              | Descripción                                  |
+| ---------------------- | --------------------------- | -------------------------------------------- |
+| `JWT_SECRET`           | `"<secret>"`                | Secreto para firmar JWT (mover a entorno).   |
+| `AUTH_GRPC_URL`        | `localhost:3001`            | Endpoint gRPC para Auth Service.             |
+| `USERS_GRPC_URL`       | `localhost:3002`            | Endpoint gRPC para User Service.             |
+| `FINANCIERO_GRPC_URL`  | `localhost:3003`            | Endpoint gRPC para Financiero Service.       |
+
+> En el código del Gateway actualmente se configuran estas URLs y certificados de manera local. Se recomienda externalizarlo.
+---
+
+
+## 🔒 gRPC con TLS/mTLS
+
+El proyecto está preparado para ejecutar gRPC sobre TLS y mTLS:
+
+- Gateway como cliente gRPC usa CA + certificado/llave de cliente.
+- Cada microservicio gRPC (Auth, Users, Financiero) expone servidor con CA + certificado/llave de servidor.
+- Rechazo estricto de peers no confiables (`rejectUnauthorized: true`).
+
+Consulta los certificados en la carpeta `certs/` y adapta rutas/hostnames mediante variables de entorno.
 
 ---
 
-## 🔒 Camino hacia mTLS
-
-El código está preparado para sustituir `Transport.TCP` por  
-`Transport.TCP_SECURE` (o gRPC) cuando dispongas de certificados de servidor y cliente.  
-Consulta el bloque comentado en `api-gateway.module.ts` para orientarte.
-
----
 
 ## 🔐 Pasos para generar certificados mTLS (entorno local)
 
@@ -190,26 +208,67 @@ Solución:
 
 ## 🛠️ Scripts npm Útiles
 
-| Comando                 | Descripción                                   |
-| ----------------------- | --------------------------------------------- |
-| `npm run format`        | Ejecuta Prettier sobre todo el código fuente  |
-| `npm run lint`          | ESLint + auto-fix                             |
-| `npm run build`         | Compila **todos** los proyectos con SWC       |
-| `npm run start`         | Arranca el gateway (producción)               |
-| `npm run start:prod`    | Arranca el bundle ya compilado                |
+| Comando                    | Descripción                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run format`           | Ejecuta Prettier sobre todo el código fuente de apps y libs                                 |
+| `npm run lint`             | Ejecuta ESLint con autofix sobre `src`, `apps`, `libs`, `test`                              |
+| `npm run build`            | Compila los proyectos Nest                                                                  |
+| `npm run start`            | Arranca la app principal (Gateway) en modo producción                                       |
+| `npm run start:dev`        | Arranca la app actual en modo desarrollo con recarga                                        |
+| `npm run start:debug`      | Arranca en modo debug con recarga                                                           |
+| `npm run start:prod`       | Ejecuta el bundle compilado                                                                 |
+| `npm test`                 | Corre la suite de tests con Jest                                                            |
+| `npm run test:watch`       | Corre Jest en modo watch                                                                    |
+| `npm run test:cov`         | Genera el reporte de cobertura de Jest                                                      |
+| `npm run test:debug`       | Ejecuta Jest con el inspector de Node                                                       |
+| `npm run test:e2e`         | Ejecuta pruebas E2E (configuración dedicada por app)                                        |
+| `npm run proto:generate`   | Genera tipos TypeScript y stubs NestJS a partir de los `.proto` hacia `libs/proto-types`   |
 
-> Añade `-- workspace=<ruta>` para lanzar un único target dentro del monorepo.
+Notas sobre `proto:generate`:
+- Usa ts-proto para generar clientes/servidores tipados compatibles con Nest (`nestJs=true`).
+- Entrada: todos los `.proto` en la carpeta `./proto`.
+- Salida: código TypeScript en `./libs/proto-types/src`.
+
+Ejecutar:
+```bash
+bash npm run proto:generate
+```
+
+Importar en el código:
+```ts
+// ejemplo 
+import { AUTH_PACKAGE_NAME, AuthServiceClient } from '@app/proto-types/auth';
+```
+
+Estructura generada:
+- Un archivo por servicio/mensaje en `libs/proto-types/src`.
+- Incluye interfaces de cliente/servidor, tipos de mensajes y constantes de paquete/nombre de servicio.
+
+## 📦 Protobuf: definición y generación
+
+- Define contratos en `./proto/*.proto` (por servicio: auth.proto, users.proto, financiero.proto).
+- Genera stubs tipados con:
+```bash
+npm run proto:generate
+```
+- Usa los tokens de paquete/servicio generados para registrar los clientes gRPC en el Gateway y para implementar controladores en los microservicios.
+
+Buenas prácticas:
+- Mantén los `.proto` como “fuente de verdad”. Cambios aquí deben regenerar y commitear la librería `proto-types`.
+- Versiona los contratos si introduces cambios incompatibles (breaking changes).
+
 
 ---
 
 ## 📈 Roadmap
 
-1. Sustituir la tienda en memoria por **PostgreSQL** usando Typeorm.
-2. Generar **tokens de refresco** y cookies HTTP-only.
-3. Implementar certificados **mTLS** y asegurar TCP.
-4. Implementar CRUD en **User Service** con patrón CQRS.
-5. Añadir documentación **OpenAPI** (`@nestjs/swagger`) en el gateway.
-
+1. Integración con **PostgreSQL** usando Prisma para servicios de dominio. ✅
+2. Generar **tokens de refresco** y uso de cookies HTTP-only.
+3. Endurecer seguridad gRPC con **mTLS** completo y configuración vía variables de entorno.
+4. Implementar CRUD completo en **User Service** con patrón CQRS y validación exhaustiva.
+5. Ampliar documentación **OpenAPI** en el Gateway y ejemplos de errores estándar.
+6. Automatizar generación de tipos a partir de `.proto` en pipelines CI (ver `proto:generate`).
+ 
 ---
 
 ## 🤝 Contribuir

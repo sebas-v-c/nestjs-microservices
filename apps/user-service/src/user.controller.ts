@@ -10,11 +10,17 @@ import {
 /* import { Observable } from 'rxjs'; */
 
 /**
- * UserServiceController
+ * Controlador gRPC/microservicio para operaciones de Usuario.
  *
- * Controlador basado en mensajes (no HTTP) que atiende las acciones relativas
- * a usuarios. Escucha el patrón `"get-user-profile"` y delega la lógica al
- * servicio correspondiente.
+ * Implementa la interfaz generada `UserServiceController` y expone handlers
+ * invocados por RPC de acuerdo al contrato protobuf de Usuarios.
+ *
+ * Responsabilidades:
+ * - Delegar en `UserServiceService` la lógica de negocio.
+ * - Mantener la forma de entrada/salida tipada (`UserRequest`, `UserResponse`).
+ *
+ * Nota:
+ * - Este controlador no expone HTTP; funciona únicamente vía gRPC.
  */
 @Controller()
 @UserServiceControllerMethods()
@@ -26,17 +32,33 @@ export class UserController implements UserServiceController {
    */
   constructor(private readonly userServiceService: UserServiceService) {}
 
+  /**
+   * Handler gRPC: Obtiene el perfil del usuario.
+   *
+   * - Atiende la operación declarada en el contrato generado (p.ej. `getUserProfile`).
+   * - Extrae `userId` del `UserRequest` y delega en el servicio de dominio.
+   *
+   * Errores:
+   * - Puede propagar excepciones de dominio (por ejemplo, `NotFoundException`)
+   *   que serán mapeadas por la infraestructura gRPC.
+   *
+   * @param request Objeto de solicitud con el identificador del usuario.
+   * @returns Promesa con el perfil del usuario (`UserResponse`).
+   */
   async getUserProfile(request: UserRequest): Promise<UserResponse> {
     return this.userServiceService.getUserProfile(request.userId);
   }
 
   /**
-   * Devuelve el perfil de un usuario dado su identificador.
+   * Alternativa basada en patrones de mensajería (deshabilitada).
    *
-   * @messagePattern "get-user-profile"
-   * @param userId Identificador del usuario solicitado.
-   * @returns Promesa que resuelve con el perfil del usuario o `null` si no se
-   *          encuentra.
+   * Ejemplo con `@MessagePattern` si no se usan stubs generados:
+   *
+   * @example
+   * // @MessagePattern('get-user-profile')
+   * // async getUserProfile(@Payload() userId: string) {
+   * //   return this.userServiceService.getUserProfile(userId);
+   * // }
    */
   /*
   @MessagePattern('get-user-profile')

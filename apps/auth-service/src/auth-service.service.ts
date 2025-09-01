@@ -9,7 +9,12 @@ import { UserCredentials /*, ValidUser*/ } from '@app/proto-types/auth';
  * • Autenticar usuarios (demo in-memory).
  * • Generar y firmar JWTs.
  * • Verificar la validez de un JWT entrante.
+ *
+ * Notas de seguridad:
+ * - Sustituye las credenciales "hard-coded" por un repositorio real.
+ * - Mantén el secreto del JWT y tiempos de expiración en variables de entorno.
  */
+
 @Injectable()
 export class AuthServiceService {
   /**
@@ -25,8 +30,8 @@ export class AuthServiceService {
    * está “hard-coded”. Sustitúyelo por una consulta a base de datos
    * o proveedor externo en un entorno real.
    *
-   * @param credential `{ username, password }` enviado por el consumidor.
-   * @returns `{ access_token: string }` si las credenciales son correctas.
+   * @param credential Credenciales `{ username, password }` enviadas por el consumidor.
+   * @returns Objeto de acceso conforme al contrato RPC (`UserAccess`), e.g. `{ accessToken }`.
    * @throws UnauthorizedException Si el usuario/contraseña no coinciden.
    */
   async login(credential: UserCredentials): Promise<{ accessToken: string }> {
@@ -47,10 +52,10 @@ export class AuthServiceService {
    * Valida un JWT y extrae los datos que contiene.
    *
    * @param token JWT a verificar.
-   * @returns Objeto con:
-   *          • `valid`  : boolean que indica la validez.
-   *          • `userId` : ID del usuario (`sub`) o `null`.
-   *          • `role`   : Rol del usuario o `null`.
+   * @returns Resultado de validación conforme al contrato RPC (`ValidUser`):
+   *          • `valid`  : indica si el token es válido.
+   *          • `userId` : ID del usuario o cadena vacía si no es válido.
+   *          • `role`   : Rol del usuario o cadena vacía si no es válido.
    */
   async validateToken(token: string) {
     try {

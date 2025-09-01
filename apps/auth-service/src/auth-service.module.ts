@@ -6,16 +6,27 @@ import { JwtModule } from '@nestjs/jwt';
 /**
  * AuthServiceModule
  *
- * Módulo raíz del micro-servicio de autenticación.
- * Se encarga de registrar los componentes necesarios para generar
- * y validar JWTs y exponerlos mediante un transporte TCP.
+ * Módulo raíz del microservicio de autenticación (gRPC).
  *
- * • `JwtModule.register` configura secret y expiración de los tokens.
- * • `controllers`        expone los `MessagePattern`s (AuthServiceController).
- * • `providers`          contiene la lógica de negocio (AuthServiceService).
+ * Responsabilidades:
+ * - Registrar y configurar proveedores necesarios para firmar y validar JWT.
+ * - Exponer controladores generados a partir del contrato gRPC.
+ * - Definir el contenedor de dependencias del servicio de autenticación.
+ *
+ * Componentes:
+ * - imports:
+ *   • JwtModule.register: Configura el secreto y la expiración de los tokens.
+ *     Recomendación: mover `secret` y `expiresIn` a variables de entorno
+ *     (por ejemplo, JWT_SECRET y JWT_EXPIRES_IN) y habilitar rotación de claves
+ *     en entornos productivos.
+ * - controllers:
+ *   • AuthController: Implementa los handlers RPC definidos en el contrato.
+ * - providers:
+ *   • AuthServiceService: Lógica de negocio para login y validación de tokens.
  */
 @Module({
   imports: [
+    // Configuración local de ejemplo. Sustituir por variables de entorno en producción.
     JwtModule.register({
       // Secret de uso interno para firmar tokens (reemplazar en producción).
       secret: 'secretKey',

@@ -3,15 +3,18 @@ import { UserController } from './user.controller';
 import { UserServiceService } from './user-service.service';
 
 /**
- * UserServiceModule
+ * Módulo raíz del microservicio de Usuarios (gRPC).
  *
- * Módulo de NestJS que agrupa todos los artefactos relacionados con el
- * microservicio de usuarios.
+ * Responsabilidades:
+ * - Declarar el controlador que implementa los handlers definidos por el contrato de Usuarios.
+ * - Registrar el servicio de dominio con la lógica de negocio relacionada a usuarios.
  *
- * • `controllers`: controla los mensajes entrantes (`UserServiceController`).
- * • `providers`: contiene la lógica de negocio (`UserServiceService`).
+ * Estructura:
+ * - controllers: expone los handlers RPC (UserController).
+ * - providers  : contiene la lógica de negocio (UserServiceService).
  *
- * Se exporta para que pueda ser importado desde el bootstrap principal.
+ * Notas:
+ * - No expone endpoints HTTP; este módulo se consume en un bootstrap gRPC.
  */
 @Module({
   imports: [],

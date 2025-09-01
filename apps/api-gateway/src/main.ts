@@ -5,6 +5,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { HttpFromGrpcErrorFilter } from './filters/http-from-grpc-error.filter';
 
+/**
+ * Punto de entrada de la aplicación API Gateway.
+ *
+ * - Inicializa la app Nest con logging basado en Pino.
+ * - Configura validación global de DTO con `ValidationPipe`.
+ * - Registra un filtro global para traducir errores gRPC a HTTP.
+ * - Expone documentación OpenAPI/Swagger en `/api/docs`.
+ * - Levanta el servidor HTTP en el puerto configurado.
+ */
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule, {
     bufferLogs: true,
@@ -12,6 +21,13 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
 
+  /**
+   * Validación global:
+   * - transform: convierte payloads a las clases DTO definidas.
+   * - whitelist: elimina propiedades no declaradas en el DTO.
+   * - forbidNonWhitelisted: lanza error si llegan propiedades extra.
+   * - exceptionFactory: normaliza el formato de error para respuestas 400.
+   */
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -29,6 +45,7 @@ async function bootstrap() {
     }),
   );
 
+  // Filtro global: mapea códigos de gRPC a HTTP y formatea el mensaje de error.
   app.useGlobalFilters(new HttpFromGrpcErrorFilter());
 
   // Swagger setup
@@ -36,6 +53,17 @@ async function bootstrap() {
     .setTitle('Auth Microservice gRPC')
     .setDescription('Plantilla de nest con microservicios gRPC')
     .setVersion('0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Introduce: Bearer <JWT>',
+      },
+      'bearer',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

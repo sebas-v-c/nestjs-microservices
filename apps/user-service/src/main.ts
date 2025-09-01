@@ -6,18 +6,30 @@ import { readFileSync } from 'fs';
 import { ServerCredentials } from '@grpc/grpc-js';
 import { USERS_PACKAGE_NAME } from '@app/proto-types/users';
 
+/**
+ * Lee un archivo desde disco y devuelve su contenido como Buffer.
+ *
+ * Útil para cargar certificados y llaves requeridos por TLS/mTLS.
+ *
+ * @param f Ruta del archivo.
+ * @returns Contenido del archivo como Buffer.
+ */
 function read(f: string) {
   return readFileSync(f);
 }
 
 /**
- * Arranca el microservicio de **User Service** usando transporte TCP.
+ * Punto de entrada del microservicio de Usuarios (gRPC).
  *
- * • Host: 127.0.0.1
- * • Puerto: 8878
+ * - Configura credenciales TLS del servidor (mTLS) usando CA, certificado y llave.
+ * - Crea una microaplicación Nest con transporte gRPC y opciones del paquete de Usuarios.
+ * - Inicia la escucha de peticiones entrantes y registra un log de arranque.
  *
- * Se ejecuta como microservicio (no HTTP) y queda escuchando peticiones
- * entrantes hasta que el proceso finaliza.
+ * Consideraciones de despliegue:
+ * - Asegura que el host en `options.url` coincida con el SAN/CN del certificado.
+ * - Gestiona rutas de certificados y parámetros de red mediante variables de entorno en producción.
+ *
+ * @returns Promesa resuelta cuando el microservicio queda escuchando el canal gRPC.
  */
 async function bootstrap(): Promise<void> {
   const serverCreds = ServerCredentials.createSsl(
